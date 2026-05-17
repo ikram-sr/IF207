@@ -1,0 +1,124 @@
+import java.util.Scanner;
+
+public class Main {
+
+    // G = jalur hijau yang boleh dilewati
+    // X = jalur merah / terlarang
+    static char[][] peta = {
+            {'G','X','X','X','X','X','X','X','X','G','G','G'},
+            {'G','X','G','G','G','X','X','G','X','G','X','G'},
+            {'G','X','X','X','G','G','G','G','G','G','X','G'},
+            {'G','G','G','G','G','X','G','G','X','X','X','G'},
+            {'G','G','X','G','G','X','G','X','X','X','X','G'},
+            {'G','G','X','G','G','X','G','G','G','G','G','G'}
+    };
+
+    // Posisi awal P1
+    static int startBaris = 5;
+    static int startKolom = 11;
+
+    // Posisi tujuan Puncak Mahameru
+    static int tujuanBaris = 0;
+    static int tujuanKolom = 0;
+
+    // Penanda pos-pos tempat istirahat
+    static boolean[][] posIstirahat = new boolean[6][12];
+
+    public static void main(String[] args) {
+        Scanner input = new Scanner(System.in);
+
+        // Menentukan lokasi pos istirahat
+        posIstirahat[5][11] = true; // P1
+        posIstirahat[4][6] = true;  // P2
+        posIstirahat[1][7] = true;  // P3
+        posIstirahat[2][5] = true;  // P4
+        posIstirahat[5][0] = true;  // P5
+        posIstirahat[3][1] = true;  // TC
+        posIstirahat[5][3] = true;  // RK
+
+        System.out.print("Masukkan tenaga awal: ");
+        int tenaga = input.nextInt();
+        input.nextLine();
+
+        System.out.print("Masukkan jalur pendakian: ");
+        String jalur = input.nextLine();
+
+        jalur = jalur.replace("\"", "");
+        jalur = jalur.replace(" ", "");
+        jalur = jalur.toUpperCase();
+
+        int baris = startBaris;
+        int kolom = startKolom;
+
+        boolean sampaiPuncak = false;
+        boolean jalurSalah = false;
+        boolean istirahatSalah = false;
+        boolean tenagaHabis = false;
+
+        for (int i = 0; i < jalur.length(); i++) {
+            char langkah = jalur.charAt(i);
+
+            if (langkah == '#') {
+                if (posIstirahat[baris][kolom]) {
+                    tenaga += 10;
+                } else {
+                    istirahatSalah = true;
+                    break;
+                }
+            } else {
+                int barisBaru = baris;
+                int kolomBaru = kolom;
+
+                if (langkah == 'L') {
+                    kolomBaru--;
+                } else if (langkah == 'R') {
+                    kolomBaru++;
+                } else if (langkah == 'U') {
+                    barisBaru--;
+                } else if (langkah == 'D') {
+                    barisBaru++;
+                } else {
+                    jalurSalah = true;
+                    break;
+                }
+
+                tenaga--;
+
+                if (tenaga < 0) {
+                    tenagaHabis = true;
+                    break;
+                }
+
+                if (barisBaru < 0 || barisBaru >= peta.length ||
+                    kolomBaru < 0 || kolomBaru >= peta[0].length ||
+                    peta[barisBaru][kolomBaru] == 'X') {
+
+                    jalurSalah = true;
+                    break;
+                }
+
+                baris = barisBaru;
+                kolom = kolomBaru;
+
+                if (baris == tujuanBaris && kolom == tujuanKolom) {
+                    sampaiPuncak = true;
+                    break;
+                }
+            }
+        }
+
+        if (sampaiPuncak) {
+            System.out.println("Selamat Pendakian anda berhasil mencapai Puncak Mahameru, sisa tenaga anda " + tenaga);
+        } else if (istirahatSalah) {
+            System.out.println("Mohon maaf, istirahat hanya diperbolehkan di Pos-pos yang tersedia");
+        } else if (tenagaHabis) {
+            System.out.println("Jalur anda salah, anda tidak akan kuat, coba jalur lain atau sempatkan istirahat terlebih dahulu");
+        } else if (jalurSalah) {
+            System.out.println("Jalur anda masuk ke jurang/blank 45");
+        } else {
+            System.out.println("Jalur belum sampai ke Puncak Mahameru");
+        }
+
+        input.close();
+    }
+}
